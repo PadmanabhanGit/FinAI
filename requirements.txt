@@ -2,13 +2,8 @@ streamlit==1.28.1
 python-dotenv==1.0.0
 langchain==0.1.14
 faiss-cpu==1.13.2
-tiktoken==0.5.2
-
-openai==1.6.1
 google-generativeai==0.5.3
 sentence-transformers==2.6.1
 transformers==4.36.2
-
 beautifulsoup4==4.12.2
 requests==2.31.0
-lxml==4.9.3

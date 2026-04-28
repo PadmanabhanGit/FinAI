@@ -1,3 +1,13 @@
+"""
+FinAI: LLM-based Equity Research Engine
+Powered by Google Gemini API (FREE TIER - No payment needed)
+
+Setup:
+1. Get free Gemini API key from: https://ai.google.dev/
+2. Add to Streamlit Cloud Secrets: GEMINI_API_KEY = "your-key"
+3. Done! App uses Gemini Pro for free.
+"""
+
 import os
 import streamlit as st
 import pickle
