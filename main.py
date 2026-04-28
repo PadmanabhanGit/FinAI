@@ -18,10 +18,11 @@ import google.generativeai as genai
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings.base import Embeddings
 from langchain.llms.base import LLM
 from langchain.schema import Document
 from dotenv import load_dotenv
+from typing import List
 
 load_dotenv()  # Load environment variables
 
@@ -32,6 +33,37 @@ if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 else:
     st.warning("⚠️ GEMINI_API_KEY not found. Please add it to Streamlit Secrets.")
+
+# Custom embedding class using Gemini API
+class GeminiEmbeddings(Embeddings):
+    """Simple embeddings using Gemini API"""
+    
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Embed search docs"""
+        embeddings = []
+        for text in texts:
+            try:
+                result = genai.embed_content(
+                    model="models/embedding-001",
+                    content=text[:2000]  # Limit text length
+                )
+                embeddings.append(result['embedding'])
+            except Exception as e:
+                st.warning(f"Embedding error for text: {str(e)}")
+                embeddings.append([0.0] * 768)  # Default embedding
+        return embeddings
+    
+    def embed_query(self, text: str) -> List[float]:
+        """Embed query text"""
+        try:
+            result = genai.embed_content(
+                model="models/embedding-001",
+                content=text[:2000]
+            )
+            return result['embedding']
+        except Exception as e:
+            st.warning(f"Query embedding error: {str(e)}")
+            return [0.0] * 768
 
 # Simple URL loader using requests + BeautifulSoup
 def load_urls(urls):
@@ -127,7 +159,7 @@ if process_url_clicked:
                 with open(file_path, "rb") as f:
                     vectorstore = pickle.load(f)
             else:
-                embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+                embeddings = GeminiEmbeddings()
                 vectorstore = FAISS.from_documents(docs, embeddings)
                 with open(file_path, "wb") as f:
                     pickle.dump(vectorstore, f)
